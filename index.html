@@ -1,4 +1,10 @@
-<style>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Galaxy Miner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
     * {
       margin: 0;
       padding: 0;
@@ -20,23 +26,101 @@
       top: 0;
       left: 0;
     }
-    </style>
-    
-    <div id="container"></div>
-    
-    <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
-      }
+
+    /* UI-кнопки */
+    #exploreBtn, #walletBtn {
+      position: fixed;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #222;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 10;
     }
-    </script>
-    
-    <script type="module">
+    #exploreBtn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    #exploreBtn {
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    #walletBtn {
+      top: 20px;
+      right: 20px;
+    }
+
+    /* Модалка Wallet */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+    .modal-content {
+      background: #111;
+      padding: 20px;
+      border-radius: 8px;
+      color: #eee;
+      width: 300px;
+      text-align: center;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #222;
+      color: #fff;
+    }
+    .modal-content .close {
+      position: absolute;
+      top: 10px; right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="container"></div>
+
+  <!-- UI -->
+  <button id="walletBtn">Wallet</button>
+  <button id="exploreBtn">Explore</button>
+
+  <div id="walletModal" class="modal">
+    <div class="modal-content">
+      <span id="closeModal" class="close">&times;</span>
+      <h2>Wallet</h2>
+      <p>Stardust: <span id="stardustCount">50</span></p>
+      <p>Stars: <span id="starsCount">0</span></p>
+      <input type="number" id="exchangeInput" placeholder="Stars to exchange" min="1" />
+      <button id="exchangeBtn">Exchange</button>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    
+
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x000000, 0.0015);
     
@@ -139,6 +223,8 @@
       blending: THREE.AdditiveBlending
     });
     
+    galaxyMaterial.transparent = true;
+    galaxyMaterial.opacity     = 1;
     const galaxy = new THREE.Points(galaxyGeometry, galaxyMaterial);
     scene.add(galaxy);
     
@@ -162,12 +248,85 @@
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambientLight);
     
+    // === Игровая логика ===
+    let stardust         = 50;   // начальный баланс
+    let stars            = 0;    // накопленные звёзды
+    let mining           = false;
+    let miningIntervalId = null;
+
+    const exploreBtn    = document.getElementById('exploreBtn');
+    const walletBtn     = document.getElementById('walletBtn');
+    const walletModal   = document.getElementById('walletModal');
+    const closeModal    = document.getElementById('closeModal');
+    const exchangeBtn   = document.getElementById('exchangeBtn');
+    const exchangeInput = document.getElementById('exchangeInput');
+    const sdCountLabel  = document.getElementById('stardustCount');
+    const stCountLabel  = document.getElementById('starsCount');
+
+    function updateUI() {
+      sdCountLabel.textContent = stardust;
+      stCountLabel.textContent = stars;
+      exploreBtn.disabled = mining || stardust <= 0;
+    }
+
+    function startMining() {
+      if (mining || stardust <= 0) return;
+      mining = true;
+      exploreBtn.textContent = 'Mining...';
+      exploreBtn.disabled = true;
+
+      miningIntervalId = setInterval(() => {
+        if (stardust <= 0) {
+          stopMining();
+          return;
+        }
+        stardust -= 1;  // 1 Stardust = 1 секунда майнинга
+        stars    += 2;  // 2 Stars в секунду
+        updateUI();
+      }, 1000);
+    }
+
+    function stopMining() {
+      mining = false;
+      clearInterval(miningIntervalId);
+      exploreBtn.textContent = 'Explore';
+      updateUI();
+    }
+
+    exploreBtn.addEventListener('click', startMining);
+
+    walletBtn.addEventListener('click', () => {
+      exchangeInput.value = '';
+      walletModal.style.display = 'flex';
+    });
+
+    closeModal.addEventListener('click', () => {
+      walletModal.style.display = 'none';
+    });
+
+    exchangeBtn.addEventListener('click', () => {
+      const want = Math.floor(parseInt(exchangeInput.value) || 0);
+      if (want > 0 && want <= stars) {
+        stars    -= want;
+        stardust += want * 2;  // 1 Star = 2 Stardust
+        updateUI();
+        exchangeInput.value = '';
+      }
+    });
+
     function animate() {
       requestAnimationFrame(animate);
     
       controls.update();
     
       galaxy.rotation.y += 0.0005;
+    
+      // мерцание при майнинге
+      if (mining) {
+        galaxyMaterial.opacity = 0.5 + 0.5 * Math.sin(Date.now() * 0.02);
+      } else {
+        galaxyMaterial.opacity = 1;
+      }
     
       renderer.render(scene, camera);
     }
@@ -178,6 +337,10 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
     
+    updateUI();
     animate();
-    </script>
+  </script>
+</body>
+</html>
+    
     

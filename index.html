@@ -49,8 +49,18 @@
       transform: translateX(-50%);
     }
     #walletBtn {
-      top: 20px;
-      right: 20px;
+      position: fixed;
+      top: 50px;           /* отступ от верхнего края */
+      left: 50%;           /* по центру экрана */
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #222;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 10;
     }
 
     /* Модалка Wallet */
@@ -249,11 +259,8 @@
     scene.add(ambientLight);
     
     // === Игровая логика ===
-    let stardust = parseInt(localStorage.getItem('stardust'), 10);
-    if (isNaN(stardust)) stardust = 50;
-    let stars = parseInt(localStorage.getItem('stars'), 10);
-    if (isNaN(stars)) stars = 0;
-
+    let stardust         = 50;   // начальный баланс
+    let stars            = 0;    // накопленные звёзды
     let mining           = false;
     let miningIntervalId = null;
 
@@ -270,9 +277,6 @@
       sdCountLabel.textContent = stardust;
       stCountLabel.textContent = stars;
       exploreBtn.disabled = mining || stardust <= 0;
-
-      localStorage.setItem('stardust', stardust);
-      localStorage.setItem('stars', stars);
     }
 
     function startMining() {
@@ -340,5 +344,4 @@
     animate();
   </script>
 </body>
-</html>    
-
+</html> 

@@ -28,7 +28,8 @@
     }
 
     /* UI-кнопки */
-    #exploreBtn, #walletBtn {
+    #exploreBtn,
+    #walletBtn {
       position: fixed;
       padding: 10px 20px;
       font-size: 16px;
@@ -39,18 +40,22 @@
       cursor: pointer;
       z-index: 10;
     }
-    #exploreBtn:disabled {
-      opacity: 0.5;
-      cursor: default;
-    }
+
     #exploreBtn {
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
     }
+
     #walletBtn {
-      top: 20px;
-      right: 20px;
+      top: 20px;        /* размещаем чуть ниже верхнего края */
+      left: 50%;        /* по центру ширины экрана */
+      transform: translateX(-50%);
+    }
+
+    #exploreBtn:disabled {
+      opacity: 0.5;
+      cursor: default;
     }
 
     /* Модалка Wallet */
@@ -65,7 +70,6 @@
       z-index: 20;
     }
     .modal-content {
-      position: relative;
       background: #111;
       padding: 20px;
       border-radius: 8px;
@@ -84,11 +88,9 @@
     }
     .modal-content .close {
       position: absolute;
-      top: 10px;
-      right: 15px;
+      top: 10px; right: 15px;
       font-size: 24px;
       cursor: pointer;
-      color: #fff;
     }
   </style>
 </head>
@@ -337,4 +339,4 @@
     animate();
   </script>
 </body>
-</html> 
+</html>   

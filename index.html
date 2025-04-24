@@ -118,12 +118,8 @@
     controls.enableDamping = true;
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.2;
-    controls.enableZoom = false;
-    controls.enablePan = false;
-    controls.touches = {
-        ONE: THREE.TOUCH.ROTATE,
-        TWO: THREE.TOUCH.DOLLY_ROTATE
-    };
+    controls.enableZoom = true;
+    controls.enablePan = true;
     
     function createGlowMaterial(color, size = 128) {
       const canvas = document.createElement('canvas');
@@ -163,9 +159,9 @@
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     const galaxyParameters = {
-      count: isMobile ? 50000 : 100000,
+      count: 100000,
       arms: 4,
-      radius: isMobile ? 8 : 10,
+      radius: 10,
       spin: 2,
       randomness: 0.3,
       randomnessPower: 3,

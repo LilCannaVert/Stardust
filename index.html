@@ -180,7 +180,7 @@
     }
     
     const galaxyParameters = {
-      count: 100000,
+      count: isLowEndDevice ? 10000 : 20000,
       arms: 4,
       radius: 10,
       spin: 2,
@@ -201,15 +201,15 @@
       const randomX = (Math.random() - 0.5) * galaxyParameters.randomness * radius;
       const randomY = (Math.random() - 0.5) * galaxyParameters.randomness * radius * 0.5;
       const randomZ = (Math.random() - 0.5) * galaxyParameters.randomness * radius;
-      const totalAngle = branchAngle + spinAngle;
+      const angle = branchAngle + spinAngle;
     
-      positions[i3] = Math.cos(totalAngle) * radius + randomX;
+      positions[i3] = Math.cos(angle) * radius + randomX;
       positions[i3 + 1] = randomY;
-      positions[i3 + 2] = Math.sin(totalAngle) * radius + randomZ;
+      positions[i3 + 2] = Math.sin(angle) * radius + randomZ;
     
-      const mixedColor = galaxyParameters.insideColor.clone();
-      mixedColor.lerp(galaxyParameters.outsideColor, radius / galaxyParameters.radius);
-      mixedColor.multiplyScalar(0.7 + 0.3 * Math.random());
+      const mixedColor = galaxyParameters.insideColor.clone()
+        .lerp(galaxyParameters.outsideColor, radius / galaxyParameters.radius)
+        .multiplyScalar(0.7 + 0.3 * Math.random());
     
       colors[i3] = mixedColor.r;
       colors[i3 + 1] = mixedColor.g;
@@ -224,11 +224,11 @@
       size: 0.02,
       vertexColors: true,
       depthWrite: false,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+      opacity: 1
     });
     
-    galaxyMaterial.transparent = true;
-    galaxyMaterial.opacity     = 1;
     const galaxy = new THREE.Points(galaxyGeometry, galaxyMaterial);
     scene.add(galaxy);
     
@@ -252,12 +252,9 @@
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambientLight);
     
-    // === Игровая логика: загрузка/сохранение из LocalStorage ===
-    let stardust = parseInt(localStorage.getItem('stardust'), 10);
-    if (isNaN(stardust)) stardust = 50;
-    let stars = parseInt(localStorage.getItem('stars'), 10);
-    if (isNaN(stars)) stars = 0;
-
+    // === Игровая логика ===
+    let stardust         = 50;   // начальный баланс
+    let stars            = 0;    // накопленные звёзды
     let mining           = false;
     let miningIntervalId = null;
 
@@ -274,10 +271,6 @@
       sdCountLabel.textContent = stardust;
       stCountLabel.textContent = stars;
       exploreBtn.disabled = mining || stardust <= 0;
-
-      // сохраняем балансы после каждого изменения
-      localStorage.setItem('stardust', stardust);
-      localStorage.setItem('stars', stars);
     }
 
     function startMining() {
@@ -345,4 +338,4 @@
     animate();
   </script>
 </body>
-</html>
+</html>   

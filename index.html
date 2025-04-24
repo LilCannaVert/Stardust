@@ -125,12 +125,6 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // --- Делаем простой фоллбек для слабых устройств ---
-    const isLowEndDevice = 
-      navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4
-      || window.devicePixelRatio > 1.5
-      || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x000000, 0.0015);
     
@@ -139,11 +133,9 @@
     );
     camera.position.set(0, 5, 15);
     
-    const renderer = new THREE.WebGLRenderer({
-      antialias: !isLowEndDevice  // на слабых отключаем сглаживание
-    });
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isLowEndDevice ? 1 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     document.getElementById('container').appendChild(renderer.domElement);
     
@@ -188,7 +180,7 @@
     }
     
     const galaxyParameters = {
-      count: isLowEndDevice ? 50000 : 100000,
+      count: 100000,
       arms: 4,
       radius: 10,
       spin: 2,
@@ -260,9 +252,12 @@
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambientLight);
     
-    // === Игровая логика ===
-    let stardust         = 50;   // начальный баланс
-    let stars            = 0;    // накопленные звёзды
+    // === Игровая логика: загрузка/сохранение из LocalStorage ===
+    let stardust = parseInt(localStorage.getItem('stardust'), 10);
+    if (isNaN(stardust)) stardust = 50;
+    let stars = parseInt(localStorage.getItem('stars'), 10);
+    if (isNaN(stars)) stars = 0;
+
     let mining           = false;
     let miningIntervalId = null;
 
@@ -279,6 +274,10 @@
       sdCountLabel.textContent = stardust;
       stCountLabel.textContent = stars;
       exploreBtn.disabled = mining || stardust <= 0;
+
+      // сохраняем балансы после каждого изменения
+      localStorage.setItem('stardust', stardust);
+      localStorage.setItem('stars', stars);
     }
 
     function startMining() {

@@ -253,8 +253,11 @@
     scene.add(ambientLight);
     
     // === Игровая логика ===
-    let stardust         = 50;   // начальный баланс
-    let stars            = 0;    // накопленные звёзды
+    let stardust = parseInt(localStorage.getItem('stardust'), 10);
+    if (isNaN(stardust)) stardust = 50;
+    let stars = parseInt(localStorage.getItem('stars'), 10);
+    if (isNaN(stars)) stars = 0;
+
     let mining           = false;
     let miningIntervalId = null;
 
@@ -271,6 +274,9 @@
       sdCountLabel.textContent = stardust;
       stCountLabel.textContent = stars;
       exploreBtn.disabled = mining || stardust <= 0;
+
+      localStorage.setItem('stardust', stardust);
+      localStorage.setItem('stars', stars);
     }
 
     function startMining() {
@@ -338,4 +344,4 @@
     animate();
   </script>
 </body>
-</html>   
+</html>

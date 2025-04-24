@@ -49,9 +49,8 @@
       transform: translateX(-50%);
     }
     #walletBtn {
-      top: 50px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 20px;
+      right: 20px;
     }
 
     /* Модалка Wallet */
@@ -66,6 +65,7 @@
       z-index: 20;
     }
     .modal-content {
+      position: relative;
       background: #111;
       padding: 20px;
       border-radius: 8px;
@@ -84,7 +84,8 @@
     }
     .modal-content .close {
       position: absolute;
-      top: 10px; right: 15px;
+      top: 10px;
+      right: 15px;
       font-size: 24px;
       cursor: pointer;
     }
@@ -321,14 +322,7 @@
       controls.update();
     
       galaxy.rotation.y += 0.0005;
-    
-      // мерцание при майнинге
-      if (mining) {
-        galaxyMaterial.opacity = 0.5 + 0.5 * Math.sin(Date.now() * 0.02);
-      } else {
-        galaxyMaterial.opacity = 1;
-      }
-    
+
       renderer.render(scene, camera);
     }
     
@@ -342,4 +336,4 @@
     animate();
   </script>
 </body>
-</html>  
+</html>
